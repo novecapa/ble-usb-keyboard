@@ -40,7 +40,12 @@ void setup() {
     gMobileBadgeClient.begin();
     gPeripheralServer.setConnectionHandlers(
         [](uint16_t connHandle) { gMobileBadgeClient.onCentralConnected(connHandle); },
-        [](uint16_t connHandle) { gMobileBadgeClient.onCentralDisconnected(connHandle); });
+        [](uint16_t connHandle) {
+            gMobileBadgeClient.onCentralDisconnected(connHandle);
+            // Cierra la sesion de teclado: el filtro de duplicados solo aplica
+            // dentro de una misma conexion, para no bloquear pruebas sucesivas.
+            gKeyboardBridge.onBleSessionEnded();
+        });
     gPeripheralServer.begin();
 }
 

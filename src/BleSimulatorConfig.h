@@ -66,8 +66,15 @@ static constexpr bool kSendStep2AsSixteenZeroes = true;
 // en un ESP32 clasico la salida queda deshabilitada de forma segura.
 static constexpr bool kUsbKeyboardEnabled = true;
 
+// Fuerza la representacion hexadecimal del payload aunque sus bytes formen
+// texto imprimible. El payload final es un identificador binario: teclear
+// "AB" en lugar de "4142" seria una interpretacion ASCII no deseada.
+// Con true, 01 23 45 67 89 AB CD EF -> "0123456789ABCDEF" siempre.
+static constexpr bool kAlwaysEncodePayloadAsHex = true;
+
 // Anexa un salto de linea (tecla Enter) al final de cada payload tecleado.
-static constexpr bool kAppendEnterAfterPayload = true;
+// Por defecto false: el host recibe solo los caracteres del payload.
+static constexpr bool kAppendEnterAfterPayload = false;
 
 // Tamano maximo de payload BLE aceptado para la salida de teclado. Los payloads
 // mas grandes se descartan con un log de aviso.
@@ -78,5 +85,21 @@ static constexpr uint32_t kKeyboardCharacterDelayMs = 5;
 
 // Numero de payloads que la cola de teclado puede almacenar en espera.
 static constexpr size_t kKeyboardQueueDepth = 8;
+
+// Tiempo maximo que un payload se mantiene retenido esperando a que el host
+// enumere el teclado USB. Pasado ese margen se descarta con un log explicito,
+// de modo que no queda un reintento indefinido. No aplica cuando el hardware
+// o la configuracion de compilacion descartan el HID de forma definitiva:
+// en ese caso el payload se descarta de inmediato con el motivo real.
+static constexpr uint32_t kUsbReadyTimeoutMs = 20000;
+
+// Periodo minimo entre logs de reintento mientras se espera a USB, para no
+// inundar el monitor serie.
+static constexpr uint32_t kUsbRetryLogIntervalMs = 2000;
+
+// Evita teclear dos veces el mismo payload dentro de una misma sesion BLE
+// (reenvios o notificaciones duplicadas). El filtro se reinicia al terminar la
+// conexion, de modo que una sesion nueva puede volver a teclear el mismo valor.
+static constexpr bool kDeduplicatePayloadPerBleSession = true;
 
 }

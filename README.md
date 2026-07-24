@@ -97,9 +97,10 @@ El central BLE debe usar los siguientes valores:
 | Characteristic UUID | `fe029319-5f83-447a-8f1c-c7c19fa19202` |
 | Escritura | `.write` o `.writeWithoutResponse` |
 | Tamaño máximo | 256 bytes por payload |
-| Texto | UTF-8 imprimible → se teclea como texto |
-| Binario | bytes no imprimibles → se teclean en hexadecimal |
-| Enter final | el firmware añade `\n` tras cada payload |
+| Payload final | siempre hexadecimal en mayúsculas, dos caracteres por byte, sin separadores (`kAlwaysEncodePayloadAsHex`) |
+| Ejemplo | `01 23 45 67 89 AB CD EF` → se teclea `0123456789ABCDEF` |
+| Enter final | desactivado por defecto (`kAppendEnterAfterPayload = false`) |
+| Duplicados | el mismo payload no se teclea dos veces dentro de una misma conexión BLE; el filtro se reinicia al desconectar |
 
 ## Compilación y carga
 
@@ -110,13 +111,23 @@ Requiere [PlatformIO](https://platformio.org/). Desde la raíz del proyecto:
 pio run -e esp32dev
 pio run -e esp32dev --target upload
 
-# ESP32-S3 (BLE + USB HID)
+# ESP32-S3 (BLE + USB HID). Logs por el puerto UART, HID por el puerto USB nativo
 pio run -e esp32-s3
 pio run -e esp32-s3 --target upload
 
+# ESP32-S3 con un solo cable: CDC + HID compuestos por el puerto USB nativo
+pio run -e esp32-s3-cdc
+pio run -e esp32-s3-cdc --target upload
+
 # Monitor serie
 pio device monitor
+python3 tools/ble_monitor.py                            # env esp32dev / esp32-s3
+python3 tools/ble_monitor.py --port /dev/cu.usbmodem101 # env esp32-s3-cdc
 ```
+
+Los dos entornos S3 compilan con `-DARDUINO_USB_MODE=0` (pila TinyUSB, única que
+ofrece HID). Sólo cambian en `ARDUINO_USB_CDC_ON_BOOT`, es decir en a qué puerto
+sale `Serial`.
 
 ## Uso
 

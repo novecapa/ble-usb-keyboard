@@ -60,14 +60,14 @@ std::string toHex(const uint8_t* data, size_t length) {
 
 }  // namespace
 
-Result convert(const uint8_t* data, size_t length) {
+Result convert(const uint8_t* data, size_t length, bool forceHex) {
     Result result;
     if (data == nullptr || length == 0) {
         result.encoding = Encoding::kText;
         return result;
     }
 
-    if (isPrintableUtf8(data, length)) {
+    if (!forceHex && isPrintableUtf8(data, length)) {
         result.encoding = Encoding::kText;
         result.text.assign(reinterpret_cast<const char*>(data), length);
         return result;
