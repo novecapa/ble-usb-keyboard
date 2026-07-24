@@ -1,0 +1,10 @@
+# PlatformIO build output
+.pio/
+
+# PlatformIO core / Python virtual envs
+.platformio-core/
+.venv/
+.venv-platformio/
+
+# macOS
+.DS_Store
