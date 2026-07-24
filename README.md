@@ -129,6 +129,40 @@ Los dos entornos S3 compilan con `-DARDUINO_USB_MODE=0` (pila TinyUSB, única qu
 ofrece HID). Sólo cambian en `ARDUINO_USB_CDC_ON_BOOT`, es decir en a qué puerto
 sale `Serial`.
 
+## Monitor serie (`ble_monitor.py`)
+
+`tools/ble_monitor.py` es la alternativa a `pio device monitor` cuando hace falta
+redirigir la salida a `grep`, `tee` o un fichero: miniterm exige un TTY y aborta
+con `termios.error` en cuanto se pipea. Además marca cada línea con el tiempo
+transcurrido, lo que permite cruzar los logs del ESP32 con los del central BLE.
+
+Sólo necesita `pyserial`. Preparación del entorno, **desde `tools/`**:
+
+```bash
+cd tools
+python3 -m venv .venv
+source .venv/bin/activate
+python3 -m pip install --upgrade pip
+python3 -m pip install pyserial
+python3 ble_monitor.py
+```
+
+En sesiones posteriores basta con `source tools/.venv/bin/activate` (el
+directorio `tools/.venv/` está ignorado por git).
+
+Opciones útiles:
+
+```bash
+python3 ble_monitor.py --reset                    # reinicia la placa y captura el arranque
+python3 ble_monitor.py --duration 60 --out s.log  # captura 60 s a fichero
+python3 ble_monitor.py --port /dev/cu.usbmodem101 # env esp32-s3-cdc
+python3 ble_monitor.py | grep '\[keyboard-bridge\]'
+```
+
+Puerto por defecto: `/dev/cu.usbserial-110`. Si no coincide, localiza el real con
+`pio device list`; **nunca** uses `/dev/cu.Bluetooth-Incoming-Port`, que es el
+puerto Bluetooth de macOS y no la placa.
+
 ## Uso
 
 1. Compila y carga el firmware en la placa (usa `esp32-s3` para salida USB HID).
